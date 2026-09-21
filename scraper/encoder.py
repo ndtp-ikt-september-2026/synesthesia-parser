@@ -4,7 +4,6 @@ ML vectorization service wrapping MiniLM-L12-v2 with thread-safe singleton.
 
 import threading
 from typing import List, Optional
-from sentence_transformers import SentenceTransformer
 
 
 class InstrumentEncoder:
@@ -36,6 +35,7 @@ class InstrumentEncoder:
         if self._model is None:
             with self._model_lock:
                 if self._model is None:
+                    from sentence_transformers import SentenceTransformer
                     self._model = SentenceTransformer(
                         'paraphrase-multilingual-MiniLM-L12-v2',
                         device='cpu'

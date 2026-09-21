@@ -1,10 +1,77 @@
-# Python-generated files
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
 wheels/
-*.egg-info
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Virtual environments
-.venv
+.venv/
+.venv*
+venv/
+ENV/
+env/
+
+# Environment variables & local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+
+# Testing and linters
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# Scraped assets, media & export logs
+data/
+output/
+exports/
+*.log
+unmapped_products.log
+scraped_data.json
+scraped_*.json
+products*.json
+*.mp3
+*.jpg
+*.jpeg
+*.png
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini

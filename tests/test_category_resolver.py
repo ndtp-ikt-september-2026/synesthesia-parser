@@ -272,6 +272,102 @@ class TestCategoryResolver(unittest.TestCase):
         self.assertEqual(subcat, 'Синтезаторы')
         self.assertEqual(ids, [24, 22])
 
+    def test_guitar_gear_shop_subcategories_mapping(self):
+        '''
+        Verifies that Pop-Music guitar gear breadcrumbs resolve into the 5 shop subcategories.
+        '''
+        cases = [
+            # Combos (ID: 17, Parent: 16)
+            ('Комбоусилитель для гитары Marshall MG15G', ['Гитарное оборудование', 'Комбики гитарные'], 'Комбики', [17, 16]),
+            ('Басовый комбо Fender Rumble 15', ['Гитарное оборудование', 'Комбики басовые'], 'Комбики', [17, 16]),
+            ('Комбик для акустики Fishman Loudbox Mini', ['Гитарное оборудование', 'Комбики для акустических гитар'], 'Комбики', [17, 16]),
+
+            # Amps / Heads (ID: 18, Parent: 16)
+            ('Гитарная голова Marshall JVM410H', ['Гитарное оборудование', 'Гитарные усилители'], 'Усилители для гитар', [18, 16]),
+            ('Басовый усилитель Markbass Little Mark IV', ['Гитарное оборудование', 'Басовые усилители'], 'Усилители для гитар', [18, 16]),
+
+            # Cabinets (ID: 19, Parent: 16)
+            ('Гитарный кабинет BLACKSTAR FLY103', ['Гитарное оборудование', 'Гитарные кабинеты'], 'Кабинеты', [19, 16]),
+            ('Басовый кабинет Warwick WCA 115', ['Гитарное оборудование', 'Басовые кабинеты'], 'Кабинеты', [19, 16]),
+
+            # Pedals for guitar (ID: 20, Parent: 16)
+            ('Педаль эффектов CALINE CP-31P', ['Гитарное оборудование', 'Педали Wah/Auto Wah/Педали Громкости'], 'Педали для гитар', [20, 16]),
+            ('Педаль Boss DS-1', ['Гитарное оборудование', 'Педали Distortion/Overdrive/Fuzz'], 'Педали для гитар', [20, 16]),
+            ('EBS MultiComp Bass Compressor', ['Гитарное оборудование', 'Басовые обработки'], 'Педали для гитар', [20, 16]),
+            ('Процессор Zoom G1X FOUR', ['Гитарное оборудование', 'Процессоры для гитар'], 'Педали для гитар', [20, 16]),
+            ('Басовый процессор Zoom B1X FOUR', ['Гитарное оборудование', 'Басовые процессоры'], 'Педали для гитар', [20, 16]),
+            ('Педаль Mooer Radar', ['Гитарное оборудование', 'Педали Cab Sim (эмуляторы кабинета)'], 'Педали для гитар', [20, 16]),
+
+            # Acoustic pedals (ID: 21, Parent: 16)
+            ('Boss AD-2 Acoustic Preamp', ['Гитарное оборудование', 'Педали для электроакустической гитары'], 'Педали для электроакустической гитары', [21, 16]),
+        ]
+
+        for title, breadcrumbs, exp_sub, exp_ids in cases:
+            subcat, root, ids = CategoryResolver.classify_and_resolve(
+                title=title,
+                breadcrumbs=breadcrumbs
+            )
+            self.assertEqual(subcat, exp_sub, f'Failed subcat for {title}')
+            self.assertEqual(root, 'Гитарное оборудование', f'Failed root for {title}')
+            self.assertEqual(ids, exp_ids, f'Failed ids for {title}')
+
+    def test_guitar_gear_exclusions_headphone_amp_and_footswitches(self):
+        '''
+        Verifies that non-shop guitar gear (headphone amps, footswitches) is rejected as UNMAPPED.
+        '''
+        excluded_cases = [
+            (
+                'Усилитель для наушников Joyo JA-03-Super-lead',
+                ['Главная', 'Каталог', 'Гитарное оборудование', 'Гитарные усилители для наушников'],
+                'https://pop-music.ru/products/usilitel-dlya-naushnikov-joyo-ja-03-super-lead-888880039191/'
+            ),
+            (
+                'Усилитель для наушников NUX GP-1',
+                ['Главная', 'Каталог', 'Гитарное оборудование', 'Гитарные усилители для наушников'],
+                'https://pop-music.ru/products/usilitel-dlya-naushnikov-nux-gp-1-888880033757/'
+            ),
+            (
+                'Футсвитч Sonicake Momentary Footswitch',
+                ['Главная', 'Каталог', 'Гитарное оборудование', 'Footswitches (педали переключения)'],
+                'https://pop-music.ru/products/futsvitch-sonicake-momentary-footswitch-888880040277/'
+            ),
+        ]
+
+        for title, breadcrumbs, url in excluded_cases:
+            subcat, root, ids = CategoryResolver.classify_and_resolve(
+                title=title,
+                breadcrumbs=breadcrumbs,
+                url=url
+            )
+            self.assertIsNone(subcat, f'Expected None subcat for excluded {title}')
+            self.assertEqual(ids, [], f'Expected empty category_ids for excluded {title}, got {ids}')
+
+    def test_guitar_gear_without_subcat_returns_empty_ids(self):
+        '''
+        Verifies that guitar equipment without a shop subcategory is NOT assigned root [16].
+        '''
+        ids = CategoryResolver.resolve_category_ids(None, 'Гитарное оборудование')
+        self.assertEqual(ids, [], 'Guitar gear without subcat must return empty IDs')
+
+    def test_scraping_engine_guitar_presets_and_subcategories(self):
+        '''
+        Verifies ScrapingEngine presets and canonical shop subcategories for guitar gear.
+        '''
+        from scraper.gear_engine import ScrapingEngine
+
+        self.assertIn('Гитарное оборудование', ScrapingEngine.CATEGORY_PRESETS)
+        self.assertEqual(
+            ScrapingEngine.CATEGORY_PRESETS['Гитарное оборудование'],
+            'https://pop-music.ru/catalog/gitarnoe-oborudovanie/'
+        )
+        self.assertEqual(
+            ScrapingEngine.CATEGORY_PRESETS['Педали для электроакустической гитары'],
+            'https://pop-music.ru/catalog/gitarnoe-oborudovanie/pedali-dlya-elektroakusticheskoy-gitary/'
+        )
+        self.assertEqual(len(ScrapingEngine.GUITAR_GEAR_SHOP_SUBCATEGORIES), 5)
+        expected_subcats = {'Комбики', 'Усилители для гитар', 'Кабинеты', 'Педали для гитар', 'Педали для электроакустической гитары'}
+        self.assertEqual(set(ScrapingEngine.GUITAR_GEAR_SHOP_SUBCATEGORIES.keys()), expected_subcats)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

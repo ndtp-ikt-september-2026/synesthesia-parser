@@ -205,22 +205,60 @@ class CategoryResolver:
         'электроакустические гитары': ('Акустические гитары', ROOT_GUITARS),
         '12-струнные гитары': ('Акустические гитары', ROOT_GUITARS),
 
-        # Guitar Gear
+        # Guitar Gear: Combos
         'комбики': ('Комбики', ROOT_GUITAR_GEAR),
         'комбоусилители': ('Комбики', ROOT_GUITAR_GEAR),
         'гитарные комбо': ('Комбики', ROOT_GUITAR_GEAR),
         'басовые комбо': ('Комбики', ROOT_GUITAR_GEAR),
+        'комбики басовые': ('Комбики', ROOT_GUITAR_GEAR),
+        'комбики гитарные': ('Комбики', ROOT_GUITAR_GEAR),
+        'комбики для акустических гитар': ('Комбики', ROOT_GUITAR_GEAR),
+
+        # Guitar Gear: Cabinets
         'кабинеты': ('Кабинеты', ROOT_GUITAR_GEAR),
         'гитарные кабинеты': ('Кабинеты', ROOT_GUITAR_GEAR),
         'басовые кабинеты': ('Кабинеты', ROOT_GUITAR_GEAR),
+
+        # Guitar Gear: Amps / Heads
         'усилители для гитар': ('Усилители для гитар', ROOT_GUITAR_GEAR),
         'гитарные усилители': ('Усилители для гитар', ROOT_GUITAR_GEAR),
+        'басовые усилители': ('Усилители для гитар', ROOT_GUITAR_GEAR),
         'головы для гитар': ('Усилители для гитар', ROOT_GUITAR_GEAR),
+        'гитарные головы': ('Усилители для гитар', ROOT_GUITAR_GEAR),
+        'басовые головы': ('Усилители для гитар', ROOT_GUITAR_GEAR),
+        'ламповые головы': ('Усилители для гитар', ROOT_GUITAR_GEAR),
+
+        # Guitar Gear: Acoustic Pedals
+        'педали для электроакустической гитары': ('Педали для электроакустической гитары', ROOT_GUITAR_GEAR),
+        'педали для электроакустических гитар': ('Педали для электроакустической гитары', ROOT_GUITAR_GEAR),
+
+        # Guitar Gear: Pedals, Stompboxes, Processors
         'педали для гитар': ('Педали для гитар', ROOT_GUITAR_GEAR),
         'педали': ('Педали для гитар', ROOT_GUITAR_GEAR),
         'педали эффектов': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'гитарные эффекты': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'гитарный эффект': ('Педали для гитар', ROOT_GUITAR_GEAR),
         'гитарные процессоры': ('Педали для гитар', ROOT_GUITAR_GEAR),
-        'педали для электроакустической гитары': ('Педали для электроакустической гитары', ROOT_GUITAR_GEAR),
+        'басовые процессоры': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'процессоры для гитар': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'басовые обработки': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали cab sim (эмуляторы кабинета)': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали cab sim': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали chorus/flanger/phaser': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали compressor': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали delays/echo': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали distortion/overdrive/fuzz': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали equalizer': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали looper': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали multi-fx': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали noise gate': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали octave/pitch': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали pre-amps/booster/di-box/аттенюаторы': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали reverb/hall': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали synth/modeler': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали tremolo/vibrato': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали tuner': ('Педали для гитар', ROOT_GUITAR_GEAR),
+        'педали wah/auto wah/педали громкости': ('Педали для гитар', ROOT_GUITAR_GEAR),
 
         # Keyboards
         'цифровые пианино': ('Цифровые пианино', ROOT_KEYBOARDS),
@@ -241,6 +279,12 @@ class CategoryResolver:
     }
 
     # Regex rules compiled for maximum performance
+    # Guitar Gear: Exclusions for products that do NOT exist in shop subcategories
+    RE_EXCLUDE_GUITAR_GEAR = re.compile(
+        r'для\s+наушников|headphone\s+amp|наушников\b|footswitch|футсвитч',
+        re.I
+    )
+
     # Guitar Gear: Pedals
     RE_PEDAL_ACOUSTIC = re.compile(
         r'(?:педал[ьяеию]|эффект|preamp|преамп|предусилител[ья]|симулятор|simulator|stompbox|процессор)'
@@ -254,25 +298,26 @@ class CategoryResolver:
         r'дисторшн|дисторшен|овердрайв|\bdistortion\b|\boverdrive\b|\bstompbox\b|'
         r'\bфазз\b|\bfuzz\b|\bдилей\b|\bdelay\b|\bревер\b|\breverb\b|ревербератор|\bхорус\b|\bchorus\b|\bфленджер\b|\bflanger\b|'
         r'\bфейзер\b|\bphaser\b|вау-вау|квакушк|\bwah\b|\bлупер\b|\blooper\b|\bоктавер\b|\boctaver\b|\bбустер\b|\bbooster\b|'
-        r'гитарн\w*\s+процессор|гитарный процессор|guitar pedal|bass pedal|'
-        r'noise gate|тюнер для гитар|cab sim|di box|\bпедаль\b(?!\s*сустейн|\s*демпфер|\s*громкост|\s*управлен)',
+        r'гитарн\w*\s+процессор|гитарный процессор|басов\w*\s+процессор|guitar pedal|bass pedal|'
+        r'noise gate|ноиз-гейт|тюнер для гитар|гитарн\w*\s+тюнер|cab sim|di box|di-box|'
+        r'\bпедаль\b(?!\s*сустейн|\s*демпфер|\s*громкост\w*\s+для\s+клавиш|\s*управлен)',
         re.I
     )
 
     # Guitar Gear: Amps & Cabinets
     RE_AMPS_COMBO = re.compile(
-        r'комбоусилител[ьяеи]|комбик[а-я]*|гитарн\w*\s+комбо|басов\w*\s+комбо|combo amplifier|guitar combo',
+        r'комбоусилител\w*|комбик\w*|гитарн\w*\s+комбо|басов\w*\s+комбо|combo amplifier|guitar combo',
         re.I
     )
 
     RE_AMPS_HEAD = re.compile(
-        r'гитарн\w*\s+голов|басов\w*\s+голов|усилител[ьяеи]\s+для\s+гитар|гитарн\w*\s+усилител[ья]|'
-        r'басов\w*\s+усилител[ья]|amplifier head|amp head|tube head|ламповая голова',
+        r'гитарн\w*\s+голов\w*|басов\w*\s+голов\w*|усилител\w*\s+для\s+гитар\w*|гитарн\w*\s+усилител\w*|'
+        r'басов\w*\s+усилител\w*|amplifier head|amp head|tube head|лампов\w*\s+голов\w*',
         re.I
     )
 
     RE_CABINETS = re.compile(
-        r'кабинет[а-я]*|cabinet|гитарн\w*\s+кабинет|басов\w*\s+кабинет|'
+        r'кабинет\w*|cabinet|гитарн\w*\s+кабинет\w*|басов\w*\s+кабинет\w*|'
         r'\b4\s*[xх]\s*12\b|\b2\s*[xх]\s*12\b|\b1\s*[xх]\s*12\b|\b4\s*[xх]\s*10\b|\b1\s*[xх]\s*15\b',
         re.I
     )
@@ -305,7 +350,7 @@ class CategoryResolver:
     )
 
     RE_GENERIC_GUITAR = re.compile(
-        r'\bгитар[а-я]*\b|\bguitar[s]?\b',
+        r'\bгитар(?:[аыеу]|ой|е|ами|ам|ах)?\b|\bguitar[s]?\b',
         re.I
     )
 
@@ -387,6 +432,12 @@ class CategoryResolver:
         clean_url = (url or '').replace('-', ' ').replace('_', ' ')
         desc_snippet = (description or '')[:300]
 
+        # Check if the product or breadcrumbs match excluded non-shop gear (headphone amps, footswitches, etc.)
+        is_excluded_gear = bool(
+            cls.RE_EXCLUDE_GUITAR_GEAR.search(clean_title) or
+            any(cls.RE_EXCLUDE_GUITAR_GEAR.search(b) for b in bc_list)
+        )
+
         # ---------------------------------------------------------------------
         # PASS 0: Authoritative Breadcrumb Direct Mapping
         # Pop-Music catalog hierarchy is the most authoritative source of truth.
@@ -396,6 +447,8 @@ class CategoryResolver:
             b_clean = b.strip().lower()
             if b_clean in cls.BREADCRUMB_MAP:
                 mapped_sub, mapped_root = cls.BREADCRUMB_MAP[b_clean]
+                if mapped_root == cls.ROOT_GUITAR_GEAR and is_excluded_gear:
+                    continue
                 # Specialization by title:
                 # 1. If breadcrumb is generic violin, check if title is electric violin
                 if mapped_sub == 'Скрипки' and cls.RE_ELECTRIC_VIOLIN.search(clean_title):
@@ -411,32 +464,35 @@ class CategoryResolver:
         # ---------------------------------------------------------------------
         primary_text = f"{clean_title} {' '.join(bc_list)}"
 
-        # 1.1 Guitar Gear: Pedals, Amps, Cabinets
-        if cls.RE_PEDAL_ACOUSTIC.search(primary_text):
-            return ('Педали для электроакустической гитары', cls.ROOT_GUITAR_GEAR)
+        # 1.1 Guitar Gear: Pedals, Amps, Cabinets (Guarded against excluded accessories)
+        if not is_excluded_gear:
+            if cls.RE_PEDAL_ACOUSTIC.search(primary_text):
+                return ('Педали для электроакустической гитары', cls.ROOT_GUITAR_GEAR)
 
-        # Ensure pedals do not falsely match when the title is an instrument
-        is_instrument_title = bool(
-            cls.RE_GENERIC_GUITAR.search(clean_title) or
-            cls.RE_SYNTHESIZER.search(clean_title) or
-            cls.RE_DIGITAL_PIANO.search(clean_title) or
-            cls.RE_MIDI_KEYBOARD.search(clean_title) or
-            cls.RE_ACOUSTIC_VIOLIN.search(clean_title) or
-            cls.RE_CELLO.search(clean_title) or
-            cls.RE_DOUBLE_BASS.search(clean_title)
-        )
+            # Ensure pedals do not falsely match when the title is an instrument
+            is_instrument_title = bool(
+                cls.RE_GENERIC_GUITAR.search(clean_title) or
+                cls.RE_SYNTHESIZER.search(clean_title) or
+                cls.RE_DIGITAL_PIANO.search(clean_title) or
+                cls.RE_MIDI_KEYBOARD.search(clean_title) or
+                cls.RE_ACOUSTIC_VIOLIN.search(clean_title) or
+                cls.RE_CELLO.search(clean_title) or
+                cls.RE_DOUBLE_BASS.search(clean_title)
+            )
 
-        if not is_instrument_title and cls.RE_PEDAL_GENERAL.search(primary_text):
-            return ('Педали для гитар', cls.ROOT_GUITAR_GEAR)
+            if not is_instrument_title and cls.RE_PEDAL_GENERAL.search(primary_text):
+                return ('Педали для гитар', cls.ROOT_GUITAR_GEAR)
 
-        if cls.RE_AMPS_COMBO.search(primary_text):
-            return ('Комбики', cls.ROOT_GUITAR_GEAR)
+            if cls.RE_AMPS_COMBO.search(primary_text):
+                return ('Комбики', cls.ROOT_GUITAR_GEAR)
 
-        if not is_instrument_title and cls.RE_CABINETS.search(primary_text):
-            return ('Кабинеты', cls.ROOT_GUITAR_GEAR)
+            if not is_instrument_title and cls.RE_CABINETS.search(primary_text):
+                return ('Кабинеты', cls.ROOT_GUITAR_GEAR)
 
-        if cls.RE_AMPS_HEAD.search(primary_text):
-            return ('Усилители для гитар', cls.ROOT_GUITAR_GEAR)
+            if cls.RE_AMPS_HEAD.search(primary_text):
+                return ('Усилители для гитар', cls.ROOT_GUITAR_GEAR)
+        else:
+            is_instrument_title = False
 
         # 1.2 Strings
         if cls.RE_ELECTRIC_VIOLIN.search(primary_text):
@@ -511,7 +567,7 @@ class CategoryResolver:
         # PASS 3: Guarded Description Fallback
         # Only reached if Title, Breadcrumbs, Specs, and URL yielded no match.
         # ---------------------------------------------------------------------
-        if not is_instrument_title and desc_snippet:
+        if not is_instrument_title and not is_excluded_gear and desc_snippet:
             if cls.RE_PEDAL_ACOUSTIC.search(desc_snippet):
                 return ('Педали для электроакустической гитары', cls.ROOT_GUITAR_GEAR)
             if cls.RE_PEDAL_GENERAL.search(desc_snippet):
@@ -525,23 +581,28 @@ class CategoryResolver:
 
         # ---------------------------------------------------------------------
         # PASS 4: Root Category Fallback
+        # Note: Guitar equipment without an existing shop subcategory is UNMAPPED.
         # ---------------------------------------------------------------------
-        if 'гитарное оборудование' in primary_text.lower() or '/catalog/gitarnoe-oborudovanie/' in url:
-            return (None, cls.ROOT_GUITAR_GEAR)
+        is_guitar_gear_context = (
+            is_excluded_gear or
+            '/catalog/gitarnoe-oborudovanie/' in url or
+            any('гитарное оборудование' in b.lower() for b in bc_list)
+        )
 
-        if cls.RE_GENERIC_STRINGS.search(primary_text) or '/catalog/strunnyie/' in url:
-            return (None, cls.ROOT_STRINGS)
+        if not is_guitar_gear_context:
+            if cls.RE_GENERIC_STRINGS.search(primary_text) or '/catalog/strunnyie/' in url:
+                return (None, cls.ROOT_STRINGS)
 
-        if cls.RE_GENERIC_KEYBOARD.search(primary_text) or '/catalog/klavishnyie/' in url:
-            return (None, cls.ROOT_KEYBOARDS)
+            if cls.RE_GENERIC_KEYBOARD.search(primary_text) or '/catalog/klavishnyie/' in url:
+                return (None, cls.ROOT_KEYBOARDS)
 
-        if cls.RE_GENERIC_GUITAR.search(primary_text) or '/catalog/gitaryi/' in url:
-            return (None, cls.ROOT_GUITARS)
+            if cls.RE_GENERIC_GUITAR.search(primary_text) or '/catalog/gitaryi/' in url:
+                return (None, cls.ROOT_GUITARS)
 
-        for b in bc_list:
-            b_clean = b.strip()
-            if b_clean in [cls.ROOT_GUITARS, cls.ROOT_GUITAR_GEAR, cls.ROOT_KEYBOARDS, cls.ROOT_STRINGS]:
-                return (None, b_clean)
+            for b in bc_list:
+                b_clean = b.strip()
+                if b_clean in [cls.ROOT_GUITARS, cls.ROOT_KEYBOARDS, cls.ROOT_STRINGS]:
+                    return (None, b_clean)
 
         # Completely unmapped
         return (None, None)
@@ -565,6 +626,10 @@ class CategoryResolver:
         if subcat_name and subcat_name in sub_map:
             sub_id, parent_id = sub_map[subcat_name]
             return [int(sub_id), int(parent_id)]
+
+        # For guitar equipment, products MUST have a valid shop subcategory
+        if root_name == cls.ROOT_GUITAR_GEAR:
+            return []
 
         if root_name and root_name in root_map:
             root_id = root_map[root_name]
@@ -595,6 +660,8 @@ class CategoryResolver:
         )
 
         category_ids = cls.resolve_category_ids(subcat, root)
+        if not category_ids:
+            return None, None, []
         return subcat, root, category_ids
 
     @classmethod

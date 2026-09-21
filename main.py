@@ -1,5 +1,5 @@
 '''
-Main application entry point for the Synesthesia Musical Gear Harvester.
+Main application entry point for the Synesthesia Musical Gear & Music Harvester.
 '''
 
 import sys
@@ -12,12 +12,27 @@ if sys.platform == 'win32':
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')
 
+
 def main():
     '''
-    Boots up either the headless CLI or the interactive Textual TUI interface.
+    Boots up either the unified CLI or the interactive Textual TUI interface.
     '''
     cli_flags = [
         '--cli', '-c', 'cli',
+        'music', 'gear',
+        '--artist', '-a',
+        '--format', '-f',
+        '--type', '-t',
+        '--live',
+        '--live-keywords',
+        '--release', '--releases', '-r',
+        '--quantity', '-q',
+        '--download-audio',
+        '--audio-tracks',
+        '--audio-quality',
+        '--pipe-to-oc',
+        '--discogs-token',
+        '--interactive', '-i',
         '--url', '-u',
         '--limit', '-l',
         '--no-vectorize',

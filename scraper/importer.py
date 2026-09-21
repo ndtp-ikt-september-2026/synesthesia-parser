@@ -6,8 +6,8 @@ import os
 import json
 import asyncio
 import shutil
-from typing import List, Dict, Any, Optional
-from .models import InstrumentPayload
+from typing import List, Dict, Any, Optional, Union
+from .models import InstrumentPayload, MusicReleasePayload
 
 
 class OpenCartImporter:
@@ -29,33 +29,31 @@ class OpenCartImporter:
     def _resolve_php(self, custom_php: Optional[str]) -> str:
         if custom_php and os.path.exists(custom_php):
             return custom_php
-        if os.path.exists(self.DEFAULT_PHP_BIN):
-            return self.DEFAULT_PHP_BIN
-        # Fallback to system path
         which_php = shutil.which('php')
         if which_php:
             return which_php
-        return self.DEFAULT_PHP_BIN
+        if os.path.exists(self.DEFAULT_PHP_BIN):
+            return self.DEFAULT_PHP_BIN
+        return 'php'
 
     def _resolve_cli_script(self, custom_script: Optional[str]) -> str:
         if custom_script and os.path.exists(custom_script):
             return custom_script
-        if os.path.exists(self.DEFAULT_CLI_SCRIPT):
-            return self.DEFAULT_CLI_SCRIPT
-        # Fallback to relative path if present
         rel_path = os.path.abspath('cli/catalog_ingest.php')
         if os.path.exists(rel_path):
             return rel_path
-        return self.DEFAULT_CLI_SCRIPT
+        if os.path.exists(self.DEFAULT_CLI_SCRIPT):
+            return self.DEFAULT_CLI_SCRIPT
+        return 'cli/catalog_ingest.php'
 
     async def ingest_payload(
         self,
-        items: List[InstrumentPayload],
+        items: List[Union[InstrumentPayload, MusicReleasePayload, Dict[str, Any]]],
         dry_run: bool = False,
         skip_images: bool = False
     ) -> Dict[str, Any]:
         '''
-        Pipes InstrumentPayload JSON array directly into catalog_ingest.php via STDIN.
+        Pipes items JSON array directly into catalog_ingest.php via STDIN.
         '''
         if not items:
             return {
@@ -69,7 +67,7 @@ class OpenCartImporter:
                 'raw_stderr': ''
             }
 
-        payload_dicts = [item.model_dump() for item in items]
+        payload_dicts = [item.model_dump() if hasattr(item, 'model_dump') else item for item in items]
         json_bytes = json.dumps(payload_dicts, ensure_ascii=False).encode('utf-8')
 
         args = [
@@ -126,7 +124,7 @@ class OpenCartImporter:
 
     def ingest_payload_sync(
         self,
-        items: List[InstrumentPayload],
+        items: List[Union[InstrumentPayload, MusicReleasePayload, Dict[str, Any]]],
         dry_run: bool = False,
         skip_images: bool = False
     ) -> Dict[str, Any]:
@@ -145,7 +143,7 @@ class OpenCartImporter:
                 'failed': 0,
             }
 
-        payload_dicts = [item.model_dump() for item in items]
+        payload_dicts = [item.model_dump() if hasattr(item, 'model_dump') else item for item in items]
         json_str = json.dumps(payload_dicts, ensure_ascii=False)
 
         args = [
@@ -159,14 +157,27 @@ class OpenCartImporter:
         if skip_images:
             args.append('--skip-images')
 
-        proc = subprocess.run(
-            args,
-            input=json_str,
-            capture_output=True,
-            text=True,
-            encoding='utf-8',
-            errors='replace'
-        )
+        try:
+            proc = subprocess.run(
+                args,
+                input=json_str,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace'
+            )
+        except FileNotFoundError as exc:
+            return {
+                'status': 'error',
+                'exit_code': 127,
+                'message': f'PHP исполняемый файл или CLI скрипт не найден ({self.php_bin} / {self.cli_script}): {exc}',
+                'processed': 0,
+                'inserted': 0,
+                'updated': 0,
+                'failed': len(items),
+                'raw_stdout': '',
+                'raw_stderr': str(exc),
+            }
 
         stdout_text = proc.stdout.strip()
         stderr_text = proc.stderr.strip()
